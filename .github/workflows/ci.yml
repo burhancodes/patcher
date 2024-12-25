@@ -29,7 +29,7 @@ jobs:
 
     - name: Install Java, Python dependencies, and zipalign
       run: |
-        sudo apt-get install -y aapt aapt2 zipalign
+        sudo apt-get install -y aapt zipalign
         pip install requests colorama
 
     - name: Download APK
