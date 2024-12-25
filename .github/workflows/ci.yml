@@ -1,0 +1,58 @@
+name: Run Telegram Patcher
+
+on:
+  workflow_dispatch:
+    inputs:
+      apk_link:
+        description: "APK file URL to be patched"
+        required: true
+        type: string
+
+jobs:
+  run-patcher:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: '17'
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+
+    - name: Install Java, Python dependencies, and zipalign
+      run: |
+        sudo apt-get install -y aapt aapt2 zipalign
+        pip install requests colorama
+
+    - name: Download APK
+      run: |
+        wget "${{ github.event.inputs.apk_link }}" -O input.apk
+        echo "Downloaded APK: input.apk"
+
+    - name: Patch APK
+      run: |
+        python3 patch.py pad
+        rm -rf input.apk
+        
+    - name: Align APK
+      run: |
+        zipalign -p -f 4 input_patched.apk output_aligned.apk
+        echo "APK aligned: output_aligned.apk"
+        rm -rf input_patched.apk
+
+    - name: Send APK to Telegram
+      env:
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      run: |
+        curl -F chat_id="$TELEGRAM_CHAT_ID" \
+             -F document=@"output_aligned.apk" \
+             https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendDocument
