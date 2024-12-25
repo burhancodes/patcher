@@ -35,8 +35,8 @@ jobs:
     - name: Download Tools
       run: |
         wget -q --show-progress https://bitbucket.org/iBotPeaches/apktool/downloads/apktool_2.10.0.jar -O apktool.jar
-        wget -q --show-progress https://github.com/AbhiTheModder/termux-scripts/blob/main/tgupload.py -O tgupload.py
-        wget -q --show-progress https://github.com/AbhiTheModder/termux-scripts/blob/main/tgpatcher.py -O tgpatcher.py
+        wget -q --show-progress https://raw.githubusercontent.com/AbhiTheModder/termux-scripts/refs/heads/main/tgupload.py -O tgupload.py
+        wget -q --show-progress https://raw.githubusercontent.com/AbhiTheModder/termux-scripts/refs/heads/main/tgpatcher.py -O tgpatcher.py
 
     - name: Download and Decompile APK
       run: |
