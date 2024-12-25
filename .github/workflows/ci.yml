@@ -56,8 +56,7 @@ jobs:
         echo "APK aligned: Telegram_Anti_Patched_aligned.apk"
         rm -rf Telegram_Anti_Patched.apk
 
-    - name: Send Anti APK to Telegram
-      if: env.new_version_available == 'true'
+    - name: Send APK to Telegram
       run: |
         pip install pyrofork tgcrypto
         export BOT_TOKEN=${{ secrets.BOT_TOKEN }}
