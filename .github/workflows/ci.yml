@@ -62,4 +62,7 @@ jobs:
         export BOT_TOKEN=${{ secrets.BOT_TOKEN }}
         export API_ID=${{ secrets.API_ID }}
         export API_HASH=${{ secrets.API_HASH }}
-        python3 tgupload.py Telegram_Anti_Patched_aligned.apk --chat-id ${{ secrets.CHAT_ID }}
+        python3 tgupload.py Telegram_Anti_Patched_aligned.apk --chat-id ${{ secrets.CHAT_ID }} --caption "$(cat <<EOF
+  - **Released by [ Sid ]**
+  EOF
+  )"
