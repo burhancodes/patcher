@@ -48,11 +48,10 @@ jobs:
         echo "APK aligned: output_aligned.apk"
         rm -rf input_patched.apk
 
-    - name: Send APK to Telegram
-      env:
-        TELEGRAM_BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-        TELEGRAM_CHAT_ID: ${{ secrets.CHAT_ID }}
-      run: |
-        curl -F chat_id="$TELEGRAM_CHAT_ID" \
-             -F document=@"output_aligned.apk" \
-             https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendDocument
+    - name: send APK to Telegram
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.CHAT_ID }}
+        token: ${{ secrets.BOT_TOKEN }}
+        message: send patched apk
+        document: output_aligned.apk
