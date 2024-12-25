@@ -32,26 +32,35 @@ jobs:
         sudo apt-get install -y aapt zipalign
         pip install requests colorama
 
-    - name: Download APK
-      run: |
-        wget "${{ github.event.inputs.apk_link }}" -O input.apk
-        echo "Downloaded APK: input.apk"
+    - name: Download Tools
+        run: |
+            wget -q --show-progress https://bitbucket.org/iBotPeaches/apktool/downloads/apktool_2.10.0.jar -O apktool.jar
+            wget -q --show-progress https://github.com/AbhiTheModder/termux-scripts/blob/main/tgupload.py -O tgupload.py
+            wget -q --show-progress https://github.com/AbhiTheModder/termux-scripts/blob/main/tgpatcher.py -O tgpatcher.py
 
-    - name: Patch APK
+    - name: Download and Decompile APK
       run: |
-        python3 patch.py pad
-        rm -rf input.apk
+        wget "${{ github.event.inputs.apk_link }}" -O Telegram.apk
+        echo "Downloaded APK: Telegram.apk"
+        java -jar apktool.jar d Telegram.apk -f
+
+    - name: Patch and Build APK
+      run: |
+        python3 tgpatcher.py --anti --dir Telegram/
+        java -jar apktool.jar b Telegram/ -o Telegram_Anti_Patched.apk
+        rm -rf Telegram.apk
 
     - name: Align APK
       run: |
-        zipalign -p -f 4 input_patched.apk output_aligned.apk
-        echo "APK aligned: output_aligned.apk"
-        rm -rf input_patched.apk
+        zipalign -p -f 4 Telegram_Anti_Patched.apk Telegram_Anti_Patched_aligned.apk
+        echo "APK aligned: Telegram_Anti_Patched_aligned.apk"
+        rm -rf Telegram_Anti_Patched.apk
 
-    - name: send APK to Telegram
-      uses: appleboy/telegram-action@master
-      with:
-        to: ${{ secrets.CHAT_ID }}
-        token: ${{ secrets.BOT_TOKEN }}
-        message: send patched apk
-        document: output_aligned.apk
+    - name: Send Anti APK to Telegram
+        if: env.new_version_available == 'true'
+        run: |
+          pip install pyrofork tgcrypto
+          export BOT_TOKEN=${{ secrets.BOT_TOKEN }}
+          export API_ID=${{ secrets.API_ID }}
+          export API_HASH=${{ secrets.API_HASH }}
+          python3 tgupload.py Telegram_Anti_Patched_aligned.apk --chat-id ${{ secrets.CHAT_ID }}
