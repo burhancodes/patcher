@@ -34,12 +34,12 @@ jobs:
 
     - name: Download Tools
       run: |
-        wget -q --show-progress https://bitbucket.org/iBotPeaches/apktool/downloads/apktool_2.10.0.jar -O apktool.jar
-        wget -q --show-progress https://raw.githubusercontent.com/AbhiTheModder/termux-scripts/refs/heads/main/tgupload.py -O tgupload.py
+        wget -q https://bitbucket.org/iBotPeaches/apktool/downloads/apktool_2.10.0.jar -O apktool.jar
+        wget -q https://raw.githubusercontent.com/AbhiTheModder/termux-scripts/refs/heads/main/tgupload.py -O tgupload.py
         
     - name: Download and Decompile APK
       run: |
-        wget "${{ github.event.inputs.apk_link }}" -O Telegram.apk
+        wget -q "${{ github.event.inputs.apk_link }}" -O Telegram.apk
         echo "Downloaded APK: Telegram.apk"
         java -jar apktool.jar d Telegram.apk -f
 
