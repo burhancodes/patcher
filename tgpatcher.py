@@ -852,63 +852,62 @@ def modify_updateParams_method(file_path, method_name):
         print(f"{YELLOW}WARN: {NC}Method {method_name} not found in the file.")
 
 
-# ONly apply below one in Plus Messenger, Telegram will crash if you do so
-# def modify_markAsReadStories(file_path):
-#     """Modify the smali file to change the iget-boolean and if-nez lines."""
-#     with open(file_path, "r") as file:
-#         lines = file.readlines()
+def modify_markAsReadStories(file_path):
+     """Modify the smali file to change the iget-boolean and if-nez lines."""
+     with open(file_path, "r") as file:
+         lines = file.readlines()
 
-#     new_lines = []
-#     in_method = False
-#     method_found = False
-#     cond_label_pattern = re.compile(r":cond_\d")
-#     register_pattern = re.compile(r"v\d+")
+     new_lines = []
+     in_method = False
+     method_found = False
+     cond_label_pattern = re.compile(r":cond_\d")
+     register_pattern = re.compile(r"v\d+")
 
-#     for line in lines:
-#         if (
-#             "iget-boolean" in line
-#             and "Lorg/telegram/tgnet/TLRPC$User;->premium:Z" in line
-#         ):
-#             method_found = True
-#             new_lines.append(line)
-#             new_lines.append("    const/4 v9, 0x1\n")
-#         elif "if-nez" in line and cond_label_pattern.search(line):
-#             new_lines.append(line)
-#         else:
-#             new_lines.append(line)
+     for line in lines:
+         if (
+             "iget-boolean" in line
+             and "Lorg/telegram/tgnet/TLRPC$User;->premium:Z" in line
+         ):
+             method_found = True
+             new_lines.append(line)
+             new_lines.append("    const/4 v9, 0x1\n")
+         elif "if-nez" in line and cond_label_pattern.search(line):
+             new_lines.append(line)
+         else:
+             new_lines.append(line)
 
 
-#         # if method_found:
-#         #     with open(file_path, "w") as file:
-#         #         file.writelines(new_lines)
-#         #     new_method_code = [
-#         #         ".method private updateButton(Z)V\n",
-#         #         ".locals 5\n",
-#         #         "const/4 v0, 0x0\n",
-#         #         "const/4 v2, 0x1\n",
-#         #         "iput-boolean v2, p0, Lorg/telegram/ui/Stories/StealthModeAlert;->stealthModeIsActive:Z\n",
-#         #         "iget-object v0, p0, Lorg/telegram/ui/Stories/StealthModeAlert;->button:Lorg/telegram/ui/Components/Premium/PremiumButtonView;\n",
-#         #         "sget v1, Lorg/telegram/messenger/R$string;->StealthModeIsActive:I\n",
-#         #         "invoke-static {v1}, Lorg/telegram/messenger/LocaleController;->getString(I)Ljava/lang/String;\n",
-#         #         "move-result-object v1\n",
-#         #         "invoke-virtual {v0, v1, v2, p1}, Lorg/telegram/ui/Components/Premium/PremiumButtonView;->setOverlayText(Ljava/lang/String;ZZ)V\n",
-#         #         "iget-object p1, p0, Lorg/telegram/ui/Stories/StealthModeAlert;->button:Lorg/telegram/ui/Components/Premium/PremiumButtonView;\n",
-#         #         "iget-object p1, p1, Lorg/telegram/ui/Components/Premium/PremiumButtonView;->overlayTextView:Lorg/telegram/ui/Components/AnimatedTextView;\n",
-#         #         "sget v0, Lorg/telegram/ui/ActionBar/Theme;->key_featuredStickers_buttonText:I\n",
-#         #         "invoke-static {v0}, Lorg/telegram/ui/ActionBar/Theme;->getColor(I)I\n",
-#         #         "move-result v0\n",
-#         #         "invoke-virtual {p1, v0}, Lorg/telegram/ui/Components/AnimatedTextView;->setTextColor(I)V\n",
-#         #         "return-void\n",
-#         #         ".end method\n",
-#         #     ]
-#         # modify_method(file_path, "private updateButton(Z)V", new_method_code)
-#         print(
-#             f"{GREEN}INFO: {NC}MarkAsRead patch applied successfully."
-#         )
-#     else:
-#         print(
-#             f"{YELLOW}WARN: {NC}MarkAsRead patch not found in the file."
-#         )
+          if method_found:
+              with open(file_path, "w") as file:
+                  file.writelines(new_lines)
+              new_method_code = [
+                  ".method private updateButton(Z)V\n",
+                  ".locals 5\n",
+                  "const/4 v0, 0x0\n",
+                  "const/4 v2, 0x1\n",
+                  "iput-boolean v2, p0, Lorg/telegram/ui/Stories/StealthModeAlert;->stealthModeIsActive:Z\n",
+                  "iget-object v0, p0, Lorg/telegram/ui/Stories/StealthModeAlert;->button:Lorg/telegram/ui/Components/Premium/PremiumButtonView;\n",
+                  "sget v1, Lorg/telegram/messenger/R$string;->StealthModeIsActive:I\n",
+                  "invoke-static {v1}, Lorg/telegram/messenger/LocaleController;->getString(I)Ljava/lang/String;\n",
+                  "move-result-object v1\n",
+                  "invoke-virtual {v0, v1, v2, p1}, Lorg/telegram/ui/Components/Premium/PremiumButtonView;->setOverlayText(Ljava/lang/String;ZZ)V\n",
+                  "iget-object p1, p0, Lorg/telegram/ui/Stories/StealthModeAlert;->button:Lorg/telegram/ui/Components/Premium/PremiumButtonView;\n",
+                  "iget-object p1, p1, Lorg/telegram/ui/Components/Premium/PremiumButtonView;->overlayTextView:Lorg/telegram/ui/Components/AnimatedTextView;\n",
+                  "sget v0, Lorg/telegram/ui/ActionBar/Theme;->key_featuredStickers_buttonText:I\n",
+                  "invoke-static {v0}, Lorg/telegram/ui/ActionBar/Theme;->getColor(I)I\n",
+                  "move-result v0\n",
+                  "invoke-virtual {p1, v0}, Lorg/telegram/ui/Components/AnimatedTextView;->setTextColor(I)V\n",
+                  "return-void\n",
+                  ".end method\n",
+              ]
+          modify_method(file_path, "private updateButton(Z)V", new_method_code)
+         print(
+             f"{GREEN}INFO: {NC}MarkAsRead patch applied successfully."
+         )
+     else:
+         print(
+             f"{YELLOW}WARN: {NC}MarkAsRead patch not found in the file."
+         )
 
 
 def modify_isChatNoForwards(file_path):
