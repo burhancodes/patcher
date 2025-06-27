@@ -1,0 +1,85 @@
+name: Run Telegram Patcher
+
+on:
+  workflow_dispatch:
+    inputs:
+      apk_link:
+        description: "APK file URL to be patched"
+        required: true
+        type: string
+
+jobs:
+  run-patcher:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'adopt'
+        java-version: '17'
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+
+    - name: Install Java, Python dependencies, and zipalign
+      run: |
+        sudo apt-get install -y aapt zipalign
+        pip install requests colorama
+
+    - name: Download Tools
+      run: |
+        wget -q https://github.com/iBotPeaches/Apktool/releases/download/v2.11.1/apktool_2.11.1.jar -O apktool.jar
+        wget -q https://raw.githubusercontent.com/AbhiTheModder/termux-scripts/refs/heads/main/tgupload.py -O tgupload.py
+        wget -q https://raw.githubusercontent.com/AbhiTheModder/termux-scripts/refs/heads/main/tgpatcher.py -O tgpatcher.py
+
+    - name: Extract file ID
+      id: extract_id
+      run: |
+        apk_link="${{ github.event.inputs.apk_link }}"
+        file_id=$(echo "$apk_link" | sed -E 's|.*/u/([^/?]+).*|\1|')
+        echo "file_id=$file_id" >> $GITHUB_ENV
+
+    - name: Fetch filename from PixelDrain API
+      id: fetch_filename
+      run: |
+        filename=$(curl -s "https://pixeldrain.com/api/file/${{ env.file_id }}/info" | jq -r .name)
+        if [ -z "$filename" ] || [ "$filename" = "null" ]; then
+          echo "Filename not found, using default: plus.apk"
+          filename="plus.apk"
+        fi
+        echo "filename=$filename" >> $GITHUB_ENV
+
+    - name: Download and Decompile APK
+      run: |
+        wget -q "${{ github.event.inputs.apk_link }}?download" -O "${{ env.filename }}"
+        echo "Downloaded APK: "${{ env.filename }}""
+        java -jar apktool.jar d "${{ env.filename }}" -f
+
+    - name: Patch and Build APK
+      run: |
+        python3 tgpatcher.py --anti --dir plus/
+        java -jar apktool.jar b plus/ -o "${{ env.filename }}"_Anti_Patched.apk
+        rm -rf "${{ env.filename }}"
+
+    - name: Align APK
+      run: |
+        zipalign -p -f 4 "${{ env.filename }}"_Anti_Patched.apk "${{ env.filename }}"_Anti_Patched_aligned.apk
+        echo "APK aligned: "${{ env.filename }}"_Anti_Patched_aligned.apk"
+        rm -rf "${{ env.filename }}"_Anti_Patched.apk
+
+    - name: Send APK to Telegram
+      run: |
+        pip install pyrofork tgcrypto
+        export BOT_TOKEN=${{ secrets.BOT_TOKEN }}
+        export API_ID=${{ secrets.API_ID }}
+        export API_HASH=${{ secrets.API_HASH }}
+        python3 tgupload.py "${{ env.filename }}"_Anti_Patched_aligned.apk --chat-id ${{ secrets.CHAT_ID }} --caption "$(cat <<EOF
+        **Released by [ Sid ]**
+        EOF
+        )"
