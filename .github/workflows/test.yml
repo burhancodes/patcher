@@ -43,10 +43,6 @@ jobs:
       id: extract_id
       run: |
         apk_link="${{ github.event.inputs.apk_link }}"
-        if [[ ! "$apk_link" =~ ^https://pixeldrain\.com/(u|api/file)/ ]]; then
-          echo "Error: Invalid PixelDrain URL: $apk_link"
-          exit 1
-        fi
         if echo "$apk_link" | grep -q "/u/"; then
           file_id=$(echo "$apk_link" | sed -E 's|.*/u/([^/?]+).*|\1|')
         else
@@ -57,7 +53,7 @@ jobs:
     - name: Fetch filename from PixelDrain API
       id: fetch_filename
       run: |
-        filename=$(curl -s "https://pixeldrain.com/api/file/${{ env.file_id }}/info" | jq -r .name)
+        filename=$(curl -s "https://pixeldra.in/api/file/${{ env.file_id }}/info" | jq -r .name)
         if [ -z "$filename" ] || [ "$filename" = "null" ]; then
           echo "Filename not found, using default: plus.apk"
           filename="plus.apk"
