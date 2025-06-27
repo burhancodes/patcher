@@ -36,24 +36,25 @@ jobs:
       run: |
         wget -q https://bitbucket.org/iBotPeaches/apktool/downloads/apktool_2.10.0.jar -O apktool.jar
         wget -q https://raw.githubusercontent.com/AbhiTheModder/termux-scripts/refs/heads/main/tgupload.py -O tgupload.py
+        wget -q https://raw.githubusercontent.com/AbhiTheModder/termux-scripts/refs/heads/main/tgpatcher.py -O tgpatcher.py
         
     - name: Download and Decompile APK
       run: |
-        wget -q "${{ github.event.inputs.apk_link }}" -O Telegram.apk
-        echo "Downloaded APK: Telegram.apk"
-        java -jar apktool.jar d Telegram.apk -f
+        wget -q "${{ github.event.inputs.apk_link }}" -O plus.apk
+        echo "Downloaded APK: plus.apk"
+        java -jar apktool.jar d plus.apk -f
 
     - name: Patch and Build APK
       run: |
-        python3 tgpatcher.py --anti --dir Telegram/
-        java -jar apktool.jar b Telegram/ -o Telegram_Anti_Patched.apk
-        rm -rf Telegram.apk
+        python3 tgpatcher.py --anti --dir plus/
+        java -jar apktool.jar b plus/ -o Plus_Anti_Patched.apk
+        rm -rf plus.apk
 
     - name: Align APK
       run: |
-        zipalign -p -f 4 Telegram_Anti_Patched.apk Telegram_Anti_Patched_aligned.apk
-        echo "APK aligned: Telegram_Anti_Patched_aligned.apk"
-        rm -rf Telegram_Anti_Patched.apk
+        zipalign -p -f 4 Plus_Anti_Patched.apk Plus_Anti_Patched_aligned.apk
+        echo "APK aligned: Plus_Anti_Patched_aligned.apk"
+        rm -rf Plus_Anti_Patched.apk
 
     - name: Send APK to Telegram
       run: |
@@ -61,7 +62,7 @@ jobs:
         export BOT_TOKEN=${{ secrets.BOT_TOKEN }}
         export API_ID=${{ secrets.API_ID }}
         export API_HASH=${{ secrets.API_HASH }}
-        python3 tgupload.py Telegram_Anti_Patched_aligned.apk --chat-id ${{ secrets.CHAT_ID }} --caption "$(cat <<EOF
+        python3 tgupload.py Plus_Anti_Patched_aligned.apk --chat-id ${{ secrets.CHAT_ID }} --caption "$(cat <<EOF
         **Released by [ Sid ]**
         EOF
         )"
