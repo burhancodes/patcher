@@ -29,7 +29,8 @@ jobs:
 
     - name: Install Java, Python dependencies, and zipalign
       run: |
-        sudo apt-get install -y aapt zipalign
+        sudo apt-get update
+        sudo apt-get install -y aapt zipalign jq
         pip install requests colorama
 
     - name: Download Tools
@@ -38,17 +39,19 @@ jobs:
         wget -q https://raw.githubusercontent.com/AbhiTheModder/termux-scripts/refs/heads/main/tgupload.py -O tgupload.py
         wget -q https://raw.githubusercontent.com/AbhiTheModder/termux-scripts/refs/heads/main/tgpatcher.py -O tgpatcher.py
 
-    - name: Extract file ID
+    - name: Validate and Extract file ID
       id: extract_id
       run: |
         apk_link="${{ github.event.inputs.apk_link }}"
-        
+        if [[ ! "$apk_link" =~ ^https://pixeldrain\.com/(u|api/file)/ ]]; then
+          echo "Error: Invalid PixelDrain URL: $apk_link"
+          exit 1
+        fi
         if echo "$apk_link" | grep -q "/u/"; then
           file_id=$(echo "$apk_link" | sed -E 's|.*/u/([^/?]+).*|\1|')
         else
           file_id=$(echo "$apk_link" | sed -E 's|.*/file/([^/?]+).*|\1|')
         fi
-
         echo "file_id=$file_id" >> $GITHUB_ENV
 
     - name: Fetch filename from PixelDrain API
@@ -61,10 +64,20 @@ jobs:
         fi
         echo "filename=$filename" >> $GITHUB_ENV
 
-    - name: Download and Decompile APK
+    - name: Download APK
       run: |
-        wget -q "${{ github.event.inputs.apk_link }}?download" -O "${{ env.filename }}"
-        echo "Downloaded APK: "${{ env.filename }}""
+        wget --tries=3 --timeout=30 "${{ github.event.inputs.apk_link }}?download" -O "${{ env.filename }}" || {
+          echo "Download failed. Possible rate limit or CAPTCHA. Trying with API key..."
+          wget --tries=3 --timeout=30 --header="Authorization: Basic $(echo -n ':${{ secrets.PIXELDRAIN_API_KEY }}' | base64)" "${{ github.event.inputs.apk_link }}?download" -O "${{ env.filename }}"
+        }
+        if [ ! -f "${{ env.filename }}" ]; then
+          echo "Error: APK download failed"
+          exit 1
+        fi
+        echo "Downloaded APK: ${{ env.filename }}"
+
+    - name: Decompile APK
+      run: |
         java -jar apktool.jar d "${{ env.filename }}" -f
 
     - name: Patch and Build APK
@@ -76,7 +89,7 @@ jobs:
     - name: Align APK
       run: |
         zipalign -p -f 4 "${{ env.filename }}"_Anti_Patched.apk "${{ env.filename }}"_Anti_Patched_aligned.apk
-        echo "APK aligned: "${{ env.filename }}"_Anti_Patched_aligned.apk"
+        echo "APK aligned: ${{ env.filename }}"_Anti_Patched_aligned.apk"
         rm -rf "${{ env.filename }}"_Anti_Patched.apk
 
     - name: Send APK to Telegram
