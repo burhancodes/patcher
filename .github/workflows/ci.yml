@@ -34,7 +34,7 @@ jobs:
 
     - name: Download Tools
       run: |
-        wget -q https://bitbucket.org/iBotPeaches/apktool/downloads/apktool_2.10.0.jar -O apktool.jar
+        wget -q https://github.com/iBotPeaches/Apktool/releases/download/v2.11.1/apktool_2.11.1.jar -O apktool.jar
         wget -q https://raw.githubusercontent.com/AbhiTheModder/termux-scripts/refs/heads/main/tgupload.py -O tgupload.py
         wget -q https://raw.githubusercontent.com/AbhiTheModder/termux-scripts/refs/heads/main/tgpatcher.py -O tgpatcher.py
         
