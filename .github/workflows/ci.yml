@@ -1,4 +1,4 @@
-name: Run Telegram Patcher
+name: Patch Telegram
 
 on:
   workflow_dispatch:
@@ -37,7 +37,12 @@ jobs:
         wget -q https://github.com/iBotPeaches/Apktool/releases/download/v2.11.1/apktool_2.11.1.jar -O apktool.jar
         wget -q https://raw.githubusercontent.com/AbhiTheModder/termux-scripts/refs/heads/main/tgupload.py -O tgupload.py
         wget -q https://raw.githubusercontent.com/AbhiTheModder/termux-scripts/refs/heads/main/tgpatcher.py -O tgpatcher.py
-        
+
+    - name: Modify tgpatcher.py
+      run: |
+        sed -i 's/Mod by Abhi/by AquaLabs/' tgpatcher.py
+        grep "by AquaLabs" tgpatcher.py || echo "Pattern not found or replacement failed"
+
     - name: Download and Decompile APK
       run: |
         wget -q "${{ github.event.inputs.apk_link }}" -O plus.apk
