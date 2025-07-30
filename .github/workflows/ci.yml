@@ -35,6 +35,7 @@ jobs:
     - name: Download Tools
       run: |
         wget -q https://github.com/REAndroid/APKEditor/releases/download/V1.4.4/APKEditor-1.4.4.jar -O apkeditor.jar
+        wget -q https://github.com/patrickfav/uber-apk-signer/releases/download/v1.3.0/uber-apk-signer-1.3.0.jar -O uber-apk-signer.jar
         wget -q https://raw.githubusercontent.com/AbhiTheModder/termux-scripts/refs/heads/main/tgupload.py -O tgupload.py
         wget -q https://raw.githubusercontent.com/AbhiTheModder/termux-scripts/refs/heads/main/tgpatcher.py -O tgpatcher.py
 
@@ -61,13 +62,33 @@ jobs:
         echo "APK aligned: Plus_Anti_Patched_aligned.apk"
         rm -rf Plus_Anti_Patched.apk
 
+    - name: Setup Keystore
+      env:
+        KEYSTORE: ${{ secrets.KEYSTORE }}
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      run: |
+        echo "$KEYSTORE" | base64 --decode > "${{ github.workspace }}/key.jks"
+
+    - name: Sign APK
+      env:
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      run: |
+        java -jar uber-apk-signer.jar --apks Plus_Anti_Patched_aligned.apk --ks "${{ github.workspace }}/key.jks" --ksPass $KEYSTORE_PASSWORD --ksAlias $KEY_ALIAS --ksKeyPass $KEY_PASSWORD --skipZipAlign --out .
+        mv Plus_Anti_Patched_aligned-signed.apk Plus_Anti_Patched_signed.apk
+        echo "APK signed: Plus_Anti_Patched_signed.apk"
+        rm -rf Plus_Anti_Patched_aligned.apk
+
     - name: Send APK to Telegram
       run: |
         pip install pyrofork tgcrypto
         export BOT_TOKEN=${{ secrets.BOT_TOKEN }}
         export API_ID=${{ secrets.API_ID }}
         export API_HASH=${{ secrets.API_HASH }}
-        python3 tgupload.py Plus_Anti_Patched_aligned.apk --chat-id ${{ secrets.CHAT_ID }} --caption "$(cat <<EOF
+        python3 tgupload.py Plus_Anti_Patched_signed.apk --chat-id ${{ secrets.CHAT_ID }} --caption "$(cat <<EOF
         **Released by [ Sid ]**
         EOF
         )"
