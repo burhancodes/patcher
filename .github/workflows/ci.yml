@@ -34,7 +34,7 @@ jobs:
 
     - name: Download Tools
       run: |
-        wget -q https://github.com/iBotPeaches/Apktool/releases/download/v2.12.0/apktool_2.12.0.jar -O apktool.jar
+        wget -q https://github.com/REAndroid/APKEditor/releases/download/V1.4.4/APKEditor-1.4.4.jar -O apkeditor.jar
         wget -q https://raw.githubusercontent.com/AbhiTheModder/termux-scripts/refs/heads/main/tgupload.py -O tgupload.py
         wget -q https://raw.githubusercontent.com/AbhiTheModder/termux-scripts/refs/heads/main/tgpatcher.py -O tgpatcher.py
 
@@ -47,14 +47,12 @@ jobs:
       run: |
         wget -q "${{ github.event.inputs.apk_link }}" -O plus.apk
         echo "Downloaded APK: plus.apk"
-        java -jar apktool.jar d plus.apk -f
+        java -jar apkeditor.jar d -i plus.apk --dex-split
 
     - name: Patch and Build APK
       run: |
         python3 tgpatcher.py --anti --dir plus/
-        sed -i '/^useMultidex:/d' plus/apktool.yml
-        echo "useMultidex: true" >> plus/apktool.yml
-        java -jar apktool.jar b plus/ -o Plus_Anti_Patched.apk -j 1
+        java -jar apkeditor.jar b -i plus/ -o Plus_Anti_Patched.apk
         rm -rf plus.apk
 
     - name: Align APK
