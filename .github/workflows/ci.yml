@@ -54,7 +54,7 @@ jobs:
         python3 tgpatcher.py --anti --dir plus/
         sed -i '/^useMultidex:/d' plus/apktool.yml
         echo "useMultidex: true" >> plus/apktool.yml
-        java -jar apktool.jar b plus/ -o Plus_Anti_Patched.apk
+        java -jar apktool.jar b plus/ -o Plus_Anti_Patched.apk -j 1
         rm -rf plus.apk
 
     - name: Align APK
