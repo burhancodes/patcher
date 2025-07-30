@@ -47,7 +47,7 @@ jobs:
       run: |
         wget -q "${{ github.event.inputs.apk_link }}" -O plus.apk
         echo "Downloaded APK: plus.apk"
-        java -jar apkeditor.jar d -i plus.apk --dex-split
+        java -jar apkeditor.jar d -i plus.apk -o plus
 
     - name: Patch and Build APK
       run: |
