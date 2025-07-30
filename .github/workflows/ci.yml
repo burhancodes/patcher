@@ -52,7 +52,7 @@ jobs:
     - name: Patch and Build APK
       run: |
         python3 tgpatcher.py --anti --dir plus/
-        java -jar apktool.jar b plus/ -o Plus_Anti_Patched.apk
+        java -jar apktool.jar b plus/ --use-multidex -o Plus_Anti_Patched.apk
         rm -rf plus.apk
 
     - name: Align APK
