@@ -48,12 +48,12 @@ jobs:
       run: |
         wget -q "${{ github.event.inputs.apk_link }}" -O plus.apk
         echo "Downloaded APK: plus.apk"
-        java -jar apkeditor.jar d -i plus.apk -o plus
+        java -jar apkeditor.jar d -i plus.apk -o plus -dex-lib jf
 
     - name: Patch and Build APK
       run: |
         python3 tgpatcher.py --anti --dir plus/
-        java -jar apkeditor.jar b -i plus/ -o Plus_Anti_Patched.apk -dex-level jf
+        java -jar apkeditor.jar b -i plus/ -o Plus_Anti_Patched.apk -dex-lib jf
         rm -rf plus.apk
 
     - name: Align APK
