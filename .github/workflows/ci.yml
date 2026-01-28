@@ -34,7 +34,7 @@ jobs:
 
     - name: Download Tools
       run: |
-        wget -q https://github.com/REAndroid/APKEditor/releases/download/V1.4.5/APKEditor-1.4.5.jar -O apkeditor.jar
+        wget -q https://github.com/REAndroid/APKEditor/releases/download/V1.4.7/APKEditor-1.4.7.jar -O apkeditor.jar
         wget -q https://github.com/patrickfav/uber-apk-signer/releases/download/v1.3.0/uber-apk-signer-1.3.0.jar -O uber-apk-signer.jar
         wget -q https://raw.githubusercontent.com/AbhiTheModder/termux-scripts/refs/heads/main/tgupload.py -O tgupload.py
         wget -q https://raw.githubusercontent.com/AbhiTheModder/termux-scripts/refs/heads/main/tgpatcher.py -O tgpatcher.py
